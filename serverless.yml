@@ -1,0 +1,16 @@
+service: toggl-sync 
+plugins:
+      - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+functions:
+  toggl_sync:
+    handler: handler.toggl
+    
+    events:
+      - http:
+          path: /test
+          method: get
