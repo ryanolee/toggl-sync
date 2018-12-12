@@ -13,7 +13,6 @@ module.exports = {
                 mergedDay[index] = task;
            }
         }
-        console.log(mergedDay.values);
         return Object.values(mergedDay);
     }
 }

@@ -4,7 +4,8 @@
   "description": "A toggle timesheet syncProcess",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "./node_modules/.bin/serverless offline -s dev",
+    "debug": "export SLS_DEBUG=* && node --inspect ./node_modules/.bin/serverless offline -s dev"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "serverless-dotenv-plugin": "^2.0.1"
   },
   "dependencies": {
-    "google-spreadsheet": "^2.0.6"
+    "google-spreadsheet": "^2.0.6",
+    "node-fetch": "^2.3.0"
   }
 }

@@ -1,4 +1,6 @@
 
+const fetch = require('node-fetch');
+
 class JiraClient{
 
     constructor (username, api_key, host){
@@ -8,7 +10,7 @@ class JiraClient{
     }
 
     getAuthedRequest(url, options = {}){
-        let headers = new Headers({
+        let headers = new fetch.Headers({
             'Authorization': 'Basic ' + Buffer.from( this.username + ':' + this.api_key).toString('base64')
         });
         return fetch(url, Object.assign(options, {headers: headers}));

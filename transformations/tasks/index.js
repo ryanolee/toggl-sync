@@ -2,6 +2,7 @@
 var Transformations = {
     layers:[
         require('./reduceTaskScope'),
+        require('./client'),
         require('./jiraEnrich')
     ],
     apply: async function(taskData){

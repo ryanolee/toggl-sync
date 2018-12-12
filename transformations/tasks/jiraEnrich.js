@@ -22,7 +22,6 @@ module.exports = {
         return task;
     },
     async getCachedSummary(ticketNumber){
-        return '';
         ticketNumber = ticketNumber.toUpperCase();
         if (ticketNumber in this.cache){
             return this.cache[ticketNumber]

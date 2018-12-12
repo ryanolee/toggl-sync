@@ -1,11 +1,13 @@
 
+const fetch = require('node-fetch');
+
 class TogglClient{
     constructor (api_key){
         this.api_key = api_key;
     }
 
     getAuthedRequest(url, options = {}){
-        let headers = new Headers({
+        let headers = new fetch.Headers({
             'Authorization': 'Basic ' + Buffer.from( this.api_key + ':api_token').toString('base64')
         });
         return fetch(url, Object.assign(options, {headers: headers}));
@@ -31,7 +33,7 @@ class TogglClient{
             reportData = reportData.concat(currentData.data);
             page++;
         } while (
-            currentData.per_page * page < currentData.total_count
+            currentData.per_page * page <= currentData.total_count
         )
         return await reportData;
     }

@@ -14,17 +14,6 @@ class GoogleSheetsClient{
                 'private_key': private_key
             }
         )
-       /* return new Promise(function(accept, reject){
-            try{
-                this.doc.useServiceAccountAuth({
-                    'client_email': client_email,
-                    'private_key': private_key
-                }, accept);
-            }
-            catch(e){
-                reject(e.message)
-            }
-        }.bind(this))*/
     }
 
     async getMetadata(){
@@ -33,8 +22,8 @@ class GoogleSheetsClient{
     }
 
     async addWorksheet(title){
-        let addWorksheetPromise = promisify(this.doc.addWorksheet)
-        return await addWorksheetPromise(title)
+        let addWorksheetPromise = promisify(this.doc.addWorksheet.bind(this.doc))
+        return await addWorksheetPromise({"title": title})
     }
 
 }
