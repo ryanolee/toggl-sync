@@ -14,8 +14,8 @@ module.exports = {
         if(ticketNumber !== null){
             ticketNumber = ticketNumber[0].toUpperCase();
             task.ticketNumber = ticketNumber;
-            const summary = await this.getCachedSummary(ticketNumber)
-            taskDescription = `${taskDescription} - ${summary} `;
+            //const summary = await this.getCachedSummary(ticketNumber)
+            //taskDescription = `${taskDescription} - ${summary} `;
         }
 
         task.description = taskDescription;

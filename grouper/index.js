@@ -19,6 +19,7 @@ function groupByDay(tasks){
         else{
             daysToReturn.push(dayTasks);
             dayTasks = []
+            dayTasks.push(tasks[i]);
         }
     }
 
@@ -26,7 +27,7 @@ function groupByDay(tasks){
     if(daysToReturn.length === 0){
         daysToReturn.push(dayTasks);
     }
-
+    
     return daysToReturn;
 }
 

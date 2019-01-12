@@ -23,6 +23,18 @@ class JiraClient{
         return await response.json();
     }
 
+    async getProjectMap(){
+        const response = await this.getAuthedRequest(`${this.host}/rest/api/2/project?expand=projectKeys`);
+        const data = await response.json();
+        let toReturn = {};
+        data.forEach((task) => {
+            task.projectKeys.forEach((key) => {
+                toReturn[key] = task.name
+            })
+        })
+        return toReturn;
+    }
+
     async getSummaryByJiraTicket(ticketNumber){
         const jql = `issue=${ticketNumber}`
         const res = await this.search(jql, 'summary', 1);

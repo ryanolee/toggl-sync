@@ -1,3 +1,6 @@
+/**
+ * @type {layer}
+ */
 module.exports = {
     apply: function(day){
         totalTime = day.reduce((total, task) => total+parseFloat(task.duration), 0)

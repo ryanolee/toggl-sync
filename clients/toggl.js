@@ -32,8 +32,12 @@ class TogglClient{
             currentData = await response.json();
             reportData = reportData.concat(currentData.data);
             page++;
+            //sleep for 1500 secs to bypass rate limits;
+            await this._sleep(1500);
         } while (
-            currentData.per_page * page <= currentData.total_count
+            //If we have run out of items or the number of items left fits in one api request
+            currentData.per_page * page <= currentData.total_count &&
+            currentData.total_count >= currentData.per_page
         )
         return await reportData;
     }
@@ -43,8 +47,28 @@ class TogglClient{
         return await response.json();
     }
 
+    async updateTimeEntry(id, newDescription){
+        const response = await this.getAuthedRequest(`https://www.toggl.com/api/v8/time_entries/${id}`,{
+            method: 'PUT',
+            body: JSON.stringify({
+                "time_entry": {
+                    "description": newDescription
+                }
+            })
+        })
 
+        return await response.json();
+    }
 
+    async getTimeEntryByID(id){
+        let response = this.getAuthedRequest(`https://www.toggl.com/api/v8/time_entries/${id}`)
+        let responseData = await response.json();
+        return responseData.data;
+    }
+
+    _sleep(millis) {
+        return new Promise(resolve => setTimeout(resolve, millis));
+    }
 }
 
 

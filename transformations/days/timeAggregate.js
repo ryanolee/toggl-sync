@@ -1,3 +1,6 @@
+/**
+ * @type {layer}
+ */
 module.exports = {
     apply: function(day){
         let mergedDay = {};
