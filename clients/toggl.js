@@ -1,6 +1,8 @@
 
 const fetch = require('node-fetch');
 
+const API_BASE_URL = 'api.track.toggl.com'
+
 class TogglClient{
     constructor (api_key){
         this.api_key = api_key;
@@ -28,7 +30,7 @@ class TogglClient{
         until = this.dateToTogglCompatible(until);
         //Yield all data in the report
         do{
-            let response = await this.getAuthedRequest(`https://toggl.com/reports/api/v2/details?user_agent=TogglTimesheetSync&workspace_id=${workspaceID}&since=${since}&until=${until}&page=${page}&order_field=date`);
+            let response = await this.getAuthedRequest(`https://${API_BASE_URL}/reports/api/v2/details?user_agent=TogglTimesheetSync&workspace_id=${workspaceID}&since=${since}&until=${until}&page=${page}&order_field=date`);
             currentData = await response.json();
             reportData = reportData.concat(currentData.data);
             page++;
@@ -43,12 +45,12 @@ class TogglClient{
     }
     //3082301
     async getWorkspaces(){
-        const response = await this.getAuthedRequest('https://www.toggl.com/api/v8/workspaces');
+        const response = await this.getAuthedRequest(`https://${API_BASE_URL}/api/v8/workspaces`);
         return await response.json();
     }
 
     async updateTimeEntry(id, newDescription){
-        const response = await this.getAuthedRequest(`https://www.toggl.com/api/v8/time_entries/${id}`,{
+        const response = await this.getAuthedRequest(`https://${API_BASE_URL}/api/v8/time_entries/${id}`,{
             method: 'PUT',
             body: JSON.stringify({
                 "time_entry": {
@@ -60,8 +62,13 @@ class TogglClient{
         return await response.json();
     }
 
+    async getCurrentTimeEntry(){
+        const response = await this.getAuthedRequest(`https://${API_BASE_URL}/api/v8/time_entries/current`);
+        return await response.json();
+    }
+
     async getTimeEntryByID(id){
-        let response = this.getAuthedRequest(`https://www.toggl.com/api/v8/time_entries/${id}`)
+        let response = this.getAuthedRequest(`https://${API_BASE_URL}/api/v8/time_entries/${id}`)
         let responseData = await response.json();
         return responseData.data;
     }
