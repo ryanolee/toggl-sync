@@ -21,7 +21,7 @@ class TogglProvider{
             //Get target date by (now - days * 24 hours - datetimeoffset)
             let targetSince = new Date(since.getTime() - ((i+1) * 24 * 60 * 60 * 1000) - (since.getTimezoneOffset() * 60 * 1000));
             let targetUntil = new Date(since.getTime() - (i * 24 * 60 * 60 * 1000) - (since.getTimezoneOffset() * 60 * 1000) - 1000);
-            console.log(targetSince, targetUntil);
+            console.log(`Gathering data for ${targetSince.toISOString()} to ${targetUntil.toISOString()}`);
             let result = await this.client.getReportData(this.workspaceID, targetSince, targetUntil);
             //throw new Error();
             result = result || [];

@@ -1,14 +1,12 @@
-const GoogleSheets = require('google-spreadsheet');
-const { promisify } = require('util');
+const {GoogleSpreadsheet} = require('google-spreadsheet');
 
 class GoogleSheetsClient{
     constructor(target_spreadsheet){
-        this.doc = new GoogleSheets(target_spreadsheet);        
+        this.doc = new GoogleSpreadsheet(target_spreadsheet);        
     }
 
     async auth(client_email, private_key){
-        let authPromise =  promisify(this.doc.useServiceAccountAuth)
-        return await authPromise(
+        return await  this.doc.useServiceAccountAuth(
             {
                 'client_email': client_email,
                 'private_key': private_key
@@ -17,13 +15,12 @@ class GoogleSheetsClient{
     }
 
     async getMetadata(){
-        let infoPromise = promisify(this.doc.getInfo)
-        return await infoPromise()
+        await this.doc.loadInfo()
+        return this.doc
     }
 
     async addWorksheet(title){
-        let addWorksheetPromise = promisify(this.doc.addWorksheet.bind(this.doc))
-        return await addWorksheetPromise({"title": title})
+        return await this.doc.addWorksheet({"title": title})
     }
 
 }

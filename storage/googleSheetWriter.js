@@ -1,5 +1,5 @@
 const GoogleSheetClient = require('./../clients/googlesheets');
-const { promisify } = require('util');
+
 
 class googleSheetWriter{
     constructor(){
@@ -19,18 +19,15 @@ class googleSheetWriter{
     async storeDay(day){
         let targetDate = new Date(day[0].start);
         let targetWorksheet = await this.getTargetWorksheet(targetDate);
-        let getCellsPromise = promisify(targetWorksheet.getCells);
 
         await this.fastForwardPointer(targetWorksheet);
 
-        let cells = await getCellsPromise({
-            'min-row': this.pointer,
-            'max-row': this.pointer + day.length,
-            'min-col': 1,
-            'max-col': this.width,
-            'return-empty': true
+        await targetWorksheet.loadCells({
+            startRowIndex: Math.min(this.pointer - 1 , 0),
+            endRowIndex: this.pointer + day.length,
+            startColumnIndex: 0,
+            endColumnIndex: this.width
         });
-
 
         for(let taskIndex = 0; day.length > taskIndex; taskIndex++){
             let task = day[taskIndex];
@@ -44,46 +41,45 @@ class googleSheetWriter{
 
             
             for(let cellIndex = 0; row.length > cellIndex; cellIndex++){
-                cells[taskIndex * this.width + cellIndex].value = row[cellIndex]
+                let cell = targetWorksheet.getCell(this.pointer + taskIndex, cellIndex)
+                cell.value = row[cellIndex]
             }
         }
-        let storePromise = promisify(targetWorksheet.bulkUpdateCells);
-        return await storePromise(cells)
+
+        await targetWorksheet.saveUpdatedCells()
+        await targetWorksheet.resetLocalCache()
+        await this.reloadMetadata()
     }
 
     async fastForwardPointer(targetWorksheet){
         this.pointer = 1;
         let lastKnownRowWithValue = 1;
         let currentRow = 1;
-        let cells = [];
+        //let cells = [];
         for(currentRow; currentRow < lastKnownRowWithValue + 10; currentRow++){
             if(currentRow % this.chunk == 1){
-                cells = await this.getNextSetOfRows(targetWorksheet, currentRow);
+                await this.getNextSetOfRows(targetWorksheet, currentRow);
             }
-            if (cells[currentRow % this.chunk].value !==  "") {
+            
+            if (targetWorksheet.getCell(currentRow, 3).value !==  null) {
                 lastKnownRowWithValue = currentRow;
             }
         }
-        this.pointer = lastKnownRowWithValue + 3;        
+
+        this.pointer = lastKnownRowWithValue + 3;    
     }
 
     async getNextSetOfRows(targetWorksheet, offset){
-        let getCellsPromise = promisify(targetWorksheet.getCells);
-
         if(offset+this.chunk > targetWorksheet.rowCount){
-            let targetWorksheetResizePromise = promisify(targetWorksheet.resize)
-            await targetWorksheetResizePromise({rowCount: offset + this.chunk * 3, colCount: this.width})
+            await targetWorksheet.resize({rowCount: offset + this.chunk * 3, columnCount: this.width})
         }
 
-        let cells = await getCellsPromise({
-            'min-row': offset,
-            'max-row': offset + this.chunk,
-            'min-col': 3,
-            'max-col': 3,
-            'return-empty': true
+        await targetWorksheet.loadCells({
+            startRowIndex: offset,
+            endRowIndex: offset + this.chunk,
+            startColumnIndex: 2,
+            endColumnIndex: 5
         });
-
-        return cells;
     }
 
     async getTargetWorksheet(date){
@@ -95,13 +91,14 @@ class googleSheetWriter{
             sheetToReturn = await this.googleSheetClient.addWorksheet(sheetName);
         }
         await this.reloadMetadata();
+
         return sheetToReturn;
 
     }
 
     async reloadMetadata(){
         this.metadata = await this.googleSheetClient.getMetadata();
-        this.worksheets = this.metadata.worksheets;
+        this.worksheets = this.metadata.sheetsByIndex;
     }
 }
 module.exports = googleSheetWriter
