@@ -1,5 +1,4 @@
 const {GoogleSpreadsheet} = require('google-spreadsheet');
-const { promisify } = require('util');
 
 class GoogleSheetsClient{
     constructor(target_spreadsheet){

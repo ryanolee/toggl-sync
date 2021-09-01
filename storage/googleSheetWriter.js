@@ -1,5 +1,5 @@
 const GoogleSheetClient = require('./../clients/googlesheets');
-const { promisify } = require('util');
+
 
 class googleSheetWriter{
     constructor(){
@@ -73,7 +73,7 @@ class googleSheetWriter{
         if(offset+this.chunk > targetWorksheet.rowCount){
             await targetWorksheet.resize({rowCount: offset + this.chunk * 3, columnCount: this.width})
         }
-        
+
         await targetWorksheet.loadCells({
             startRowIndex: offset,
             endRowIndex: offset + this.chunk,
