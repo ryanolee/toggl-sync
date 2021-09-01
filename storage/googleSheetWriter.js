@@ -20,9 +20,7 @@ class googleSheetWriter{
         let targetDate = new Date(day[0].start);
         let targetWorksheet = await this.getTargetWorksheet(targetDate);
 
-        console.log("Beginning fast foreward")
         await this.fastForwardPointer(targetWorksheet);
-        console.log("Got past fast forewards")
 
         await targetWorksheet.loadCells({
             startRowIndex: Math.min(this.pointer - 1 , 0),
@@ -31,13 +29,6 @@ class googleSheetWriter{
             endColumnIndex: this.width
         });
 
-        console.log("Loading Day region:")
-        console.log({
-            startRowIndex: this.pointer,
-            endRowIndex: this.pointer + day.length,
-            startColumnIndex: 1,
-            endColumnIndex: this.width
-        })
         for(let taskIndex = 0; day.length > taskIndex; taskIndex++){
             let task = day[taskIndex];
             let row = [
@@ -50,7 +41,6 @@ class googleSheetWriter{
 
             
             for(let cellIndex = 0; row.length > cellIndex; cellIndex++){
-                console.log([this.pointer + taskIndex, cellIndex])
                 let cell = targetWorksheet.getCell(this.pointer + taskIndex, cellIndex)
                 cell.value = row[cellIndex]
             }
@@ -71,14 +61,11 @@ class googleSheetWriter{
                 await this.getNextSetOfRows(targetWorksheet, currentRow);
             }
             
-            console.log(`Getting row ${currentRow}, 4`)
-            console.log(targetWorksheet.getCell(currentRow, 4).value)
-            if (targetWorksheet.getCell(currentRow, 4).value !==  null) {
-                console.log("Updated!")
+            if (targetWorksheet.getCell(currentRow, 3).value !==  null) {
                 lastKnownRowWithValue = currentRow;
             }
         }
-        console.log("Fast forwarded pointer")
+
         this.pointer = lastKnownRowWithValue + 3;    
     }
 
@@ -86,7 +73,7 @@ class googleSheetWriter{
         if(offset+this.chunk > targetWorksheet.rowCount){
             await targetWorksheet.resize({rowCount: offset + this.chunk * 3, columnCount: this.width})
         }
-        console.log(`Loading at offset ${offset}`)
+        
         await targetWorksheet.loadCells({
             startRowIndex: offset,
             endRowIndex: offset + this.chunk,

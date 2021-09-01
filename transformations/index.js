@@ -21,7 +21,6 @@ class Transformation {
 	async applyToDataItem(data){
 		for(let layer of this.layers){
 			data = await layer.apply(data);
-			console.log(data.length);
 		}
 		return data;
 	}
