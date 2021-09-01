@@ -7,41 +7,43 @@ const dayTransformations = require('./transformations/days');
 const groupByDay = require('./grouper');
 const googleSheetWriter = require('./storage/googleSheetWriter');
 const TogglProvider = require('./providers/togglProvider')
+//const {stopCurrentlyRunningEntry} = require('./actions/toggl');
 
 module.exports.sync = async (event, context) => {
-	let togglClient = new TogglClient(process.env.TOGGL_API_KEY);
-	const workSpaceData = await togglClient.getWorkspaces();
-	let togglProvider = new TogglProvider(togglClient,workSpaceData[0].id);
-	let reportData = await togglProvider.getDays(2, new Date());
-	
-	let from = new Date();
-	let until = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
-
-	let fromDispDate = from.toLocaleDateString('en-GB');
-	let toDispDate = until.toLocaleDateString('en-GB');
-	console.log(`Exporting data for ${fromDispDate} to ${toDispDate}`);
-
-	console.log('Gathering report data...');
-	//let reportData = await togglClient.getReportData(workSpaceData[0].id, until, from);
-	console.log(`Found ${reportData.length} items to sync with google sheets.`)
-
-	console.log('Applying transformations to tasks...')
-	const transformedReportData = await taskTransformations.apply(reportData);
-
-	console.log('Grouping data by day...')
-	const groupedData = groupByDay(transformedReportData);
-
-	//const prunedGroupedData = groupedData.filter(function(day){ return Object.keys(day).length !== 0; })
-	console.log('Applying transformations to day...')
-	const transformedGroupData = await dayTransformations.apply(groupedData);
-
-	console.log('Saving data to google sheets...')
-	let days = transformedGroupData.reverse();
-
+	//let togglClient = new TogglClient(process.env.TOGGL_API_KEY);
+	//const workSpaceData = await togglClient.getWorkspaces();
+	//let togglProvider = new TogglProvider(togglClient,workSpaceData[0].id);
+	//let reportData = await togglProvider.getDays(40, new Date());
+	//
+	//let from = new Date();
+	//let until = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+//
+	//let fromDispDate = from.toLocaleDateString('en-GB');
+	//let toDispDate = until.toLocaleDateString('en-GB');
+	//console.log(`Exporting data for ${fromDispDate} to ${toDispDate}`);
+//
+	//console.log('Gathering report data...');
+	////let reportData = await togglClient.getReportData(workSpaceData[0].id, until, from);
+	//console.log(`Found ${reportData.length} items to sync with google sheets.`)
+//
+	//console.log('Applying transformations to tasks...')
+	//const transformedReportData = await taskTransformations.apply(reportData);
+//
+	//console.log('Grouping data by day...')
+	//const groupedData = groupByDay(transformedReportData);
+//
+	////const prunedGroupedData = groupedData.filter(function(day){ return Object.keys(day).length !== 0; })
+	//console.log('Applying transformations to day...')
+	//const transformedGroupData = await dayTransformations.apply(groupedData);
+//
+	//console.log('Saving data to google sheets...')
+	//let days = transformedGroupData.reverse();
+//
 	let googleSheet = new googleSheetWriter();
 	googleSheet = await googleSheet.init();
-
-	
+	//console.log(JSON.stringify(days))
+	//return {}
+	const days = require('./data.json')
 	for(let day = 0; day < days.length; day++){
 		await googleSheet.storeDay(days[day]);
 		console.log(`Wrote day ${day + 1} of ${days.length} to timesheets.`)
@@ -84,3 +86,10 @@ module.exports.refresh = async (event, context) => {
 	console.log('Done!');
 	return {}
 }
+/*
+module.exports.stopper = async (event, context) => {
+	let togglClient = new TogglClient(process.env.TOGGL_API_KEY);
+	console.log(await stopCurrentlyRunningEntry(togglClient))
+
+}*/
+
