@@ -3,7 +3,7 @@ service: toggl-sync-timesheet-v2
 provider: 
   memorySize: 256
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   versionFunctions: true
 
 plugins: 
@@ -25,6 +25,14 @@ functions:
         schedule: 
           enabled: true
           rate: cron(0/15 9-18 ? * MON-FRI *)
+
+  myhours_sync:
+    handler: 'handler.myhours_sync'
+    events: 
+      - 
+        schedule: 
+          enabled: false
+          rate: cron(0 0 * * ? *)
   
   #toggl_stop:
   #  handler: 'handler.stopper'

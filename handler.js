@@ -7,14 +7,30 @@ const dayTransformations = require('./transformations/days');
 const groupByDay = require('./grouper');
 const googleSheetWriter = require('./storage/googleSheetWriter');
 const TogglProvider = require('./providers/togglProvider')
+const MyHoursClient = require('./clients/myhours')
 //const {stopCurrentlyRunningEntry} = require('./actions/toggl');
+
+module.exports.myhours_sync = async (event, context) => {
+	const myHoursClient = new MyHoursClient()
+	await myHoursClient.init()
+	const days = await myHoursClient.getFormattedDays()
+	let googleSheet = new googleSheetWriter();
+	googleSheet = await googleSheet.init();
+
+	for (let day = 0; day < days.length; day++) {
+		await googleSheet.storeDay(days[day]);
+		console.log(`Wrote day ${day + 1} of ${days.length} to timesheets.`)
+	}
+
+	console.log('Done!')
+}
 
 module.exports.sync = async (event, context) => {
 	let togglClient = new TogglClient(process.env.TOGGL_API_KEY);
 	const workSpaceData = await togglClient.getWorkspaces();
-	let togglProvider = new TogglProvider(togglClient,workSpaceData[0].id);
+	let togglProvider = new TogglProvider(togglClient, workSpaceData[0].id);
 	let reportData = await togglProvider.getDays(40, new Date());
-	
+
 	let from = new Date();
 	let until = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
 
@@ -42,7 +58,7 @@ module.exports.sync = async (event, context) => {
 	let googleSheet = new googleSheetWriter();
 	googleSheet = await googleSheet.init();
 
-	for(let day = 0; day < days.length; day++){
+	for (let day = 0; day < days.length; day++) {
 		await googleSheet.storeDay(days[day]);
 		console.log(`Wrote day ${day + 1} of ${days.length} to timesheets.`)
 	}
@@ -52,8 +68,8 @@ module.exports.sync = async (event, context) => {
 
 
 module.exports.refresh = async (event, context) => {
-    let togglClient = new TogglClient(process.env.TOGGL_API_KEY);
-    let jiraClient = new JiraClient(process.env.JIRA_API_USERNAME, process.env.JIRA_API_KEY, process.env.JIRA_API_HOST);
+	let togglClient = new TogglClient(process.env.TOGGL_API_KEY);
+	let jiraClient = new JiraClient(process.env.JIRA_API_USERNAME, process.env.JIRA_API_KEY, process.env.JIRA_API_HOST);
 
 	const workSpaceData = await togglClient.getWorkspaces();
 
@@ -62,23 +78,23 @@ module.exports.refresh = async (event, context) => {
 
 	console.log('Gathering report data...');
 	let tasks = await togglClient.getReportData(workSpaceData[0].id, until, from);
-    const jiraTicketRegex = /^\s*([a-zA-Z0-9]{0,4}-\d+)\s*$/;
-    let summary = '';
-    let taskDescription = '';
+	const jiraTicketRegex = /^\s*([a-zA-Z0-9]{0,4}-\d+)\s*$/;
+	let summary = '';
+	let taskDescription = '';
 
-    
-	for(let task of tasks){
+
+	for (let task of tasks) {
 		let ticketNumber = task.description.match(jiraTicketRegex);
-        
-        if(ticketNumber !== null){
-            ticketNumber = ticketNumber[0].toUpperCase();
 
-            console.log(`Updating entry for ${ticketNumber}`);
+		if (ticketNumber !== null) {
+			ticketNumber = ticketNumber[0].toUpperCase();
 
-            summary = await jiraClient.getSummaryByJiraTicket(ticketNumber)
-            taskDescription = `${ticketNumber} - ${summary} `;
-            await togglClient.updateTimeEntry(task.id, taskDescription);
-        }
+			console.log(`Updating entry for ${ticketNumber}`);
+
+			summary = await jiraClient.getSummaryByJiraTicket(ticketNumber)
+			taskDescription = `${ticketNumber} - ${summary} `;
+			await togglClient.updateTimeEntry(task.id, taskDescription);
+		}
 	}
 
 	console.log('Done!');
